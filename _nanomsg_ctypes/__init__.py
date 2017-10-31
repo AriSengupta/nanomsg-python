@@ -150,17 +150,6 @@ nn_connect.__doc__ = "add a remote endpoint to the socket"
 nn_shutdown = _nn_shutdown
 nn_shutdown.__doc__ = "remove an endpoint from a socket"
 
-# struct nn_iovec {
-#     void *iov_base;
-#     size_t iov_len;
-# };
-# struct nn_msghdr {
-#     struct nn_iovec *msg_iov;
-#     int msg_iovlen;
-#     void *msg_control;
-#     size_t msg_controllen;
-# };
-
 def create_writable_buffer(size):
     """Returns a writable buffer.
 
@@ -297,23 +286,27 @@ def nn_recvmsg(socket, sizes = None):
     "receive message/messages"
     if sizes:
         iovecList = []
+        buffers = []
         for sz in sizes:
             iovec = NN_IOVEC()
             iovec.iov_len = sz
-            buf = (ctypes.c_char * sz)()
-            iovec.iov_base = ctypes.cast(buf, ctypes.c_void_p)
+            buf = bytearray(sz)
+            buffers.append(buf)
+            ctypesBuf = (ctypes.c_char * len(buf)).from_buffer(buf)
+            iovec.iov_base = ctypes.c_void_p(ctypes.addressof(ctypesBuf))
             iovecList.append(iovec)
         msgHdr = NN_MSGHDR(iovecList)
-        # pointer_type = ctypes.POINTER(NN_MSGHDR)
-        # pp = pointer_type.from_address(ctypes.addressof(msgHdr))
-        pp = ctypes.pointer(msgHdr)
-        # pp = ctypes.byref(msgHdr)
-        print("argument type: "+str(pp))
-        print("function arguments: "+str(_nn_recvmsg.argtypes))
-        rtn = _nn_recvmsg(socket, pp, 0)
-        print("here's the result: "+str(rtn))
-        if rtn < 0 : 
-            print(nn_strerror(nn_errno()))
+        if isinstance(socket, int): 
+            fd = socket
+        else:
+            fd = socket.fd
+        rtn = _nn_recvmsg(fd, ctypes.pointer(msgHdr), 0)
+        if rtn < 0 :
+            return None, None, nn_strerror(nn_errno())
+        else:
+            res = buffers
+            res.append(None)
+            return tuple(res)
     else:
         pass # tbd
 
