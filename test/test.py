@@ -10,8 +10,8 @@ with Socket(SUB) as s:
 	frameSize = 324*240*4
 	while True:
 		frameNoBuf, frame, err = nnc.nn_recvmsg(s, [4, frameSize])
-		frameNo, = struct.unpack('<L', frameNoBuf)
 		if not err:
+			frameNo, = struct.unpack('<L', frameNoBuf)
 			print "frameNo "+ str(frameNo) + " and frame data (" + str(len(frame)) + " bytes) received"
 		else:
 			print "error reading from socket: "+str(err)
