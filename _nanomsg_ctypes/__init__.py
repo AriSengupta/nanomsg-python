@@ -27,7 +27,7 @@ class NN_MSGHDR(ctypes.Structure):
 
 if sys.platform in ('win32', 'cygwin'):
     _functype = ctypes.WINFUNCTYPE
-    _lib = ctypes.windll.nanomsg
+    _lib = ctypes.cdll.nanomsg
 elif sys.platform == 'darwin':
     _functype = ctypes.CFUNCTYPE
     _lib = ctypes.cdll.LoadLibrary('libnanomsg.dylib')
