@@ -71,6 +71,7 @@ setup(
     version=__version__,
     packages=[str('nanomsg'), str('_nanomsg_ctypes'), str('nanomsg_wrappers')],
     ext_modules=[cpy_extension],
+    include_dirs=['include'],
     cmdclass = {'build_ext': skippable_build_ext},
     install_requires=install_requires,
     description='Python library for nanomsg.',
